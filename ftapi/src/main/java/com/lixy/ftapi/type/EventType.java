@@ -1,0 +1,14 @@
+package com.lixy.ftapi.type;
+
+public enum EventType {
+	SYSTEM_STARTED,
+	SYTEM_STOPPED,
+	AUTHORITY_CHANGE,
+	USER_CHANGE,
+	MAIL_CREATE,
+	NEW_USER,
+	NEW_COMMENTER,
+	NEW_FORTUNE,
+	CREDIT_CHANGE,
+
+}

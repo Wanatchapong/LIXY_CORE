@@ -1,0 +1,64 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/task 
+		http://www.springframework.org/schema/task/spring-task-3.0.xsd
+		http://www.springframework.org/schema/rabbit 
+		http://www.springframework.org/schema/rabbit/spring-rabbit-1.5.xsd">
+	<mvc:annotation-driven />
+	<task:annotation-driven />
+	<context:component-scan
+		base-package="com.lixy.ftapi,com.lixy.ftapi.task.*, com.lixy.ftapi.listener.*, com.lixy.ftapi.filter.*,  com.lixy.ftapi.queue.*, com.lixy.ftapi.service.*, com.lixy.ftapi.webservice.*" />
+	<bean id="applicationContextProvider" class="com.lixy.ftapi.conf.common.ApplicationContextProvider"></bean>
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/views/jsp/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="useDefaultSuffixPattern" value="false" />
+	</bean>
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="classpath:messages" />
+	</bean>
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<property name="defaultLocale" value="tr" />
+		<property name="cookieName" value="myAppLocaleCookie"></property>
+		<property name="cookieMaxAge" value="50"></property>
+	</bean>
+
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+			<property name="paramName" value="locale" />
+		</bean>
+	</mvc:interceptors>
+
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<rabbit:listener-container
+		connection-factory="connectionFactory" concurrency="5"
+		max-concurrency="5" declaration-retries="2">
+		<rabbit:listener ref="fileUploadListener" queues="uploadQueue" />
+		<rabbit:listener ref="newFortuneListener" queues="newFortuneQueue" />
+		<rabbit:listener ref="tokenExpireListener" queues="tokenExpireQueue" />
+		<rabbit:listener ref="newCustomerListener" queues="newCustomerQueue" />
+		<rabbit:listener ref="mailListener" queues="mailQueue" />
+		<rabbit:listener ref="requestLogListener" queues="requestQueue" />
+		<rabbit:listener ref="alarmListener" queues="alarmQueue" />
+	</rabbit:listener-container>
+</beans>
