@@ -73,6 +73,9 @@ public class User extends BaseEntity implements UserDetails, Serializable{
 	@Column(name = "locale")
 	private String locale;
 	
+	@Column(name = "mobile_phone")
+	private String mobilePhone;
+	
 	@JsonIgnore
 	@Column(name = "register_ip")
 	private String registerIp;
@@ -167,6 +170,14 @@ public class User extends BaseEntity implements UserDetails, Serializable{
 
 	public Long getFbProfileId() {
 		return fbProfileId;
+	}
+
+	public String getMobilePhone() {
+		return mobilePhone;
+	}
+
+	public void setMobilePhone(String mobilePhone) {
+		this.mobilePhone = mobilePhone;
 	}
 
 	public void setFbProfileId(Long fbProfileId) {

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lixy.ftapi.domain.Customer;
 import com.lixy.ftapi.domain.FortuneRequest;
 import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.exception.ApiException;
@@ -61,6 +62,25 @@ public class CustomerController {
 				user = userService.getUserById(userId);
 			}
 			response.setObject(user);
+		} catch (Exception e) {
+			response.convertToGResponse(e);
+		}
+		
+		return response;
+	}
+	
+	@RequestMapping(value = "/get_customer_info/{uid}", method = RequestMethod.GET)
+	public GResponse getCustomerInformation(UserAuthentication auth, @PathVariable(value = "uid") Long userId) {
+		GResponse response = new GResponse();
+		try {
+			Customer customer = null;
+			
+			if(!auth.getUser().hasAuthority(AuthorityType.ROLE_ROOT) &&auth.getUser().getId().longValue() != userId){
+				throw new ApiException("100", utilService.getMessage("user.id.mismatch "));
+			} else {
+				customer = customerService.getCustomerByUserId(userId);
+			}
+			response.setObject(customer);
 		} catch (Exception e) {
 			response.convertToGResponse(e);
 		}
