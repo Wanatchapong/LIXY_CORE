@@ -17,6 +17,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @DynamicInsert
 @DynamicUpdate
@@ -34,6 +36,7 @@ public class Authority implements GrantedAuthority, Serializable{
 	@Column(name = "authority_name")
 	private String authorityName;
 
+	@JsonIgnore
 	@Column(name = "CREATED_DATE")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date createdDate;

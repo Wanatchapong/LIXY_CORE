@@ -2,6 +2,7 @@ package com.lixy.ftapi.dao.impl;
 
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,26 @@ public class FortuneRequestDaoImpl extends GenericDaoHibernateImpl<FortuneReques
 		}
 		
 		return criteria.getExecutableCriteria(getCurrentSession()).setMaxResults(Constant.MAXIMUM_FORTUNE_REQUEST_RESULT).list();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<FortuneRequest> getFortuneRequest(String status, Long start, Long limit) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(FortuneRequest.class);
+		
+		if(!Util.isNullObject(status)){
+			criteria.add(Restrictions.eq("requestStatus", status));	
+		}
+		
+		Criteria executableCriteria = criteria.getExecutableCriteria(getCurrentSession());
+		
+		if(start != null)
+			executableCriteria.setFirstResult(start.intValue());
+		
+		if(limit != null)
+			executableCriteria.setMaxResults(limit.intValue());
+		
+		return executableCriteria.list();
 	}
 
 

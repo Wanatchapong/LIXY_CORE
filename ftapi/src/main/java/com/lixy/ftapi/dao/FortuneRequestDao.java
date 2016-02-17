@@ -8,5 +8,7 @@ import com.lixy.ftapi.type.RequestStatusType;
 public interface FortuneRequestDao extends GenericDao<FortuneRequest, Long> {
 
 	public List<FortuneRequest> getFortuneRequestByUserId(Long userId, RequestStatusType status);
+	
+	public List<FortuneRequest> getFortuneRequest(String status, Long start, Long limit);
 
 }

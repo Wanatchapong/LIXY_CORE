@@ -50,25 +50,6 @@ public class CustomerController {
 	@Autowired
 	private CustomerService customerService;
 	
-	@RequestMapping(value = "/get_user_info/{uid}", method = RequestMethod.GET)
-	public GResponse getUserInformation(UserAuthentication auth, @PathVariable(value = "uid") Long userId) {
-		GResponse response = new GResponse();
-		try {
-			User user = null;
-			
-			if(!auth.getUser().hasAuthority(AuthorityType.ROLE_ROOT) &&auth.getUser().getId().longValue() != userId){
-				throw new ApiException("100", utilService.getMessage("user.id.mismatch "));
-			} else {
-				user = userService.getUserById(userId);
-			}
-			response.setObject(user);
-		} catch (Exception e) {
-			response.convertToGResponse(e);
-		}
-		
-		return response;
-	}
-	
 	@RequestMapping(value = "/get_customer_info/{uid}", method = RequestMethod.GET)
 	public GResponse getCustomerInformation(UserAuthentication auth, @PathVariable(value = "uid") Long userId) {
 		GResponse response = new GResponse();

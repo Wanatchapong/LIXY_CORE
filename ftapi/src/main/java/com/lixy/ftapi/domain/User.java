@@ -1,6 +1,7 @@
 package com.lixy.ftapi.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.lixy.ftapi.type.AuthorityType;
 
 @Entity
@@ -82,6 +84,16 @@ public class User extends BaseEntity implements UserDetails, Serializable{
 	
 	@Column(name = "status")
 	private Long status;
+	
+	@JsonInclude
+	public List<String> getAuthoritiesStr(){
+		List<String> auths = new ArrayList<>();
+		Set<Authority> authoritySet = getAuthoritySet();
+		for (Authority authority : authoritySet) {
+			auths.add(authority.getAuthorityName());
+		}
+		return auths;
+	}
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.EAGER)
