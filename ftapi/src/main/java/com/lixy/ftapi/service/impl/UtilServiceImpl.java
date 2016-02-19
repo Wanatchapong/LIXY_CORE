@@ -2,6 +2,13 @@ package com.lixy.ftapi.service.impl;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -135,13 +142,32 @@ public class UtilServiceImpl implements UtilService {
 			logger.error("FTAPI UPLOAD initialize fail", ex);
 		}
 		
+		FacebookUtil.APP_ID = CryptoUtils.decrypt(getParameterValue("FACEBOOK_APP_ID"));
+		FacebookUtil.APP_SECRET = CryptoUtils.decrypt(getParameterValue("FACEBOOK_APP_SECRET"));
+
+		ExecutorService executor = Executors.newCachedThreadPool();
+		Callable<Void> task = new Callable<Void>() {
+			public Void call() {
+				try {
+					logger.info("Lixy App FB initialize start");
+					FacebookUtil.init();
+				} catch (Exception ex) {
+					logger.error("Lixy App FB initialize fail", ex);
+				}
+				return null;
+			}
+		};
+		Future<Void> future = executor.submit(task);
 		try {
-			logger.info("Lixy App FB initialize start");
-			FacebookUtil.APP_ID = CryptoUtils.decrypt(getParameterValue("FACEBOOK_APP_ID"));
-			FacebookUtil.APP_SECRET = CryptoUtils.decrypt(getParameterValue("FACEBOOK_APP_SECRET"));
-			FacebookUtil.init();
-		} catch (Exception ex) {
-			logger.error("Lixy App FB initialize fail", ex);
+			future.get(5, TimeUnit.SECONDS);
+		} catch (TimeoutException ex) {
+			logger.error("Timeout when fb init", ex);
+		} catch (InterruptedException e) {
+			logger.error("InterruptedException when fb init", e);
+		} catch (ExecutionException e) {
+			logger.error("ExecutionException when fb init", e);
+		} finally {
+			future.cancel(true); // may or may not desire this
 		}
 
 	}

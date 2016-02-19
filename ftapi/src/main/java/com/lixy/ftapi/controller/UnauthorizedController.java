@@ -78,6 +78,11 @@ public class UnauthorizedController{
 		return response;
 	}
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/vcommenter/{id}")	
+	public VirtualCommenter getCommenter(@PathVariable(value="id") Long virtualCommenterId){
+		return customerService.getVirtualCommenter(virtualCommenterId);
+	}
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/active_vcommenter")	
 	public List<VirtualCommenter> getActiveVirtualCommenters(){
 		return customerService.getVirtualCommenters(SwitchType.ACTIVE.getSwithStatus());
