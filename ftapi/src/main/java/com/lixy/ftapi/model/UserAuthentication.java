@@ -61,7 +61,6 @@ public class UserAuthentication implements Authentication {
 		authenticated = isAuthenticated;
 	}
 	
-	
 	public User getUser() {
 		return user;
 	}

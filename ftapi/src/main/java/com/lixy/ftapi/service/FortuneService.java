@@ -38,4 +38,6 @@ public interface FortuneService {
 	
 	public Long createConversation(Long requestId, Long transactionLimit, ConversationStatusType status) throws ApiException;
 
+	public List<FortuneInfo> convertAllToFortuneInfo(List<FortuneRequest> request);
+	
 }

@@ -1,5 +1,6 @@
 package com.lixy.ftapi.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,17 +9,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lixy.ftapi.domain.Customer;
 import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.exception.ApiException;
 import com.lixy.ftapi.model.GResponse;
 import com.lixy.ftapi.model.UserAuthentication;
+import com.lixy.ftapi.service.CustomerService;
 import com.lixy.ftapi.service.UserService;
 import com.lixy.ftapi.service.UtilService;
 import com.lixy.ftapi.type.AuthorityType;
 import com.lixy.ftapi.type.StatusType;
-import com.lixy.ftapi.util.CryptoUtils;
 import com.lixy.ftapi.util.SecurityUtil;
 import com.lixy.ftapi.util.Util;
 
@@ -32,19 +35,42 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private CustomerService customerService;
 
 	@RequestMapping(value = "/get_user_info/{uid}", method = RequestMethod.GET)
-	public GResponse getUserInformation(UserAuthentication auth, @PathVariable(value = "uid") Long userId) {
+	public GResponse getUserInformation(UserAuthentication auth, @PathVariable(value = "uid") Long userId,
+			@RequestParam(value = "full", required=false) String full) {
 		GResponse response = new GResponse();
+		HashMap<String, Object> infoMap = new HashMap<>();
+		
 		try {
+			boolean isRoot = auth.getUser().hasAuthority(AuthorityType.ROLE_ROOT);
+			boolean isCommenter = auth.getUser().hasAuthority(AuthorityType.ROLE_COMMENTER);
+			boolean idMatch = (auth.getUser().getId().longValue() == userId);
+			
 			User user = null;
 
-			if (!auth.getUser().hasAuthority(AuthorityType.ROLE_ROOT) && auth.getUser().getId().longValue() != userId) {
+			if (!(isRoot || isCommenter) && !idMatch) {
 				throw new ApiException("100", utilService.getMessage("user.id.mismatch "));
 			} else {
 				user = userService.getUserById(userId);
+				
+				if(!isRoot && !idMatch){
+					user.setFbProfileId(null);
+					user.setMobilePhone(null);
+					user.setStatus(null);
+					user.setUserAuthorityList(null);
+					user.setUsername(null);
+				} else if(isRoot && "f".equalsIgnoreCase(full)) { //only root users may want additional info
+					Customer customer = customerService.getCustomerByUserId(userId);
+					infoMap.put("CUSTOMER", customer);
+				} 
+				
+				infoMap.put("USER", user);
+				response.setObject(infoMap);
 			}
-			response.setObject(user);
 		} catch (Exception e) {
 			response.convertToGResponse(e);
 		}

@@ -9,6 +9,6 @@ public interface FortuneRequestDao extends GenericDao<FortuneRequest, Long> {
 
 	public List<FortuneRequest> getFortuneRequestByUserId(Long userId, RequestStatusType status);
 	
-	public List<FortuneRequest> getFortuneRequest(String status, Long start, Long limit);
+	public List<FortuneRequest> getFortuneRequest(Long ownerId, String status, Long start, Long limit);
 
 }

@@ -33,12 +33,17 @@ public class FortuneRequestDaoImpl extends GenericDaoHibernateImpl<FortuneReques
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<FortuneRequest> getFortuneRequest(String status, Long start, Long limit) {
+	public List<FortuneRequest> getFortuneRequest(Long ownerId, String status, Long start, Long limit) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(FortuneRequest.class);
 		
-		if(!Util.isNullObject(status)){
+		if(!Util.isNullOrEmpty(status)){
 			criteria.add(Restrictions.eq("requestStatus", status));	
 		}
+		
+		if(!Util.isNullObject(ownerId)){
+			criteria.add(Restrictions.eq("ownerId", ownerId));	
+		}
+		
 		
 		Criteria executableCriteria = criteria.getExecutableCriteria(getCurrentSession());
 		

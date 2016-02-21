@@ -1,6 +1,7 @@
 package com.lixy.ftapi.model;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Map;
 
 import com.lixy.ftapi.domain.FortuneRequestDetail;
@@ -29,6 +30,9 @@ public class FortuneInfo {
 	private ResponseType responseType;
 	
 	private Map<String, FortuneRequestDetail> details;
+	
+	private Date createdDate;
+	private Date lastModifiedDate;
 
 	public Long getRequestId() {
 		return requestId;
@@ -132,6 +136,22 @@ public class FortuneInfo {
 
 	public void setDetails(Map<String, FortuneRequestDetail> details) {
 		this.details = details;
+	}
+
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	public void setLastModifiedDate(Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
 	
 	

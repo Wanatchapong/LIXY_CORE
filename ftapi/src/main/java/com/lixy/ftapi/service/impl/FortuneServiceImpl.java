@@ -294,6 +294,9 @@ public class FortuneServiceImpl implements FortuneService {
 		info.setResponseType(responseType);
 
 		info.setDetails(request.getDetails());
+		
+		info.setCreatedDate(request.getCreatedDate());
+		info.setLastModifiedDate(request.getModifiedDate());
 	}
 
 	@Override
@@ -306,5 +309,22 @@ public class FortuneServiceImpl implements FortuneService {
 		conversation.setTransactionLimit(transactionLimit);
 		
 		return conversationDao.create(conversation);
+	}
+
+	@Override
+	public List<FortuneInfo> convertAllToFortuneInfo(List<FortuneRequest> request) {
+		if(Util.isNullObject(request))
+			return null;
+		
+		List<FortuneInfo> infos = new ArrayList<>();
+		for (FortuneRequest fortuneRequest : request) {
+			try {
+				infos.add(convertToRequestModel(fortuneRequest));
+			} catch (ApiException e) {
+				logger.error("APIEX", e);
+			}
+		}
+		
+		return infos;
 	}
 }

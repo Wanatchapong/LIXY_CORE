@@ -89,10 +89,22 @@ public class User extends BaseEntity implements UserDetails, Serializable{
 	public List<String> getAuthoritiesStr(){
 		List<String> auths = new ArrayList<>();
 		Set<Authority> authoritySet = getAuthoritySet();
+		
+		if(authoritySet == null)
+			return null;
+		
 		for (Authority authority : authoritySet) {
 			auths.add(authority.getAuthorityName());
 		}
 		return auths;
+	}
+	
+	public boolean isRoot(){
+		return hasAuthority(AuthorityType.ROLE_ROOT);
+	}
+	
+	public boolean isCommenter(){
+		return hasAuthority(AuthorityType.ROLE_COMMENTER);
 	}
 	
 	@JsonIgnore
@@ -103,9 +115,11 @@ public class User extends BaseEntity implements UserDetails, Serializable{
 	@JsonIgnore
 	public Set<Authority> getAuthoritySet(){
 		Set<Authority> authoritySet = new HashSet<>();
-		for (UserAuthority uauth : userAuthorityList) {
-			if(uauth.getStatus().longValue() == 0)
-				authoritySet.add(uauth.getAuthority());
+		if(userAuthorityList != null) {
+			for (UserAuthority uauth : userAuthorityList) {
+				if(uauth.getStatus().longValue() == 0)
+					authoritySet.add(uauth.getAuthority());
+			}
 		}
 		return authoritySet;
 	}
