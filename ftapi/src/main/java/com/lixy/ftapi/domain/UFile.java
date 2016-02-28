@@ -5,9 +5,12 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -51,6 +54,13 @@ public class UFile implements Serializable {
 	
 	@Column(name = "full_server_path")
 	private String fullServerPath;
+	
+	@Column(name = "file_identifier")
+	private String fileIdentifier;
+	
+	@JoinColumn(name = "server_id", referencedColumnName = "id")
+	@ManyToOne(optional = true, fetch = FetchType.EAGER)
+	private Server server;
 
 	@Column(name = "status")
 	private Long status;
@@ -158,10 +168,29 @@ public class UFile implements Serializable {
 	public void setServerUploadDate(Date serverUploadDate) {
 		this.serverUploadDate = serverUploadDate;
 	}
+	
+	public String getFileIdentifier() {
+		return fileIdentifier;
+	}
+
+	public void setFileIdentifier(String fileIdentifier) {
+		this.fileIdentifier = fileIdentifier;
+	}
+
+	public Server getServer() {
+		return server;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
+	}
 
 	@Override
 	public String toString() {
-		return "UFile [id=" + id + ", uploader=" + uploader + ", originalName=" + originalName + ", tempName=" + tempName + ", fullTempPath=" + fullTempPath + ", status=" + status + ", createdDate="
-				+ createdDate + "]";
+		return "UFile [id=" + id + ", uploader=" + uploader + ", owner=" + owner + ", originalName=" + originalName
+				+ ", mimeType=" + mimeType + ", tempName=" + tempName + ", size=" + size + ", fullTempPath="
+				+ fullTempPath + ", fullServerPath=" + fullServerPath + ", fileIdentifier=" + fileIdentifier
+				+ ", server=" + server + ", status=" + status + ", createdDate=" + createdDate + ", serverUploadDate="
+				+ serverUploadDate + "]";
 	}
 }

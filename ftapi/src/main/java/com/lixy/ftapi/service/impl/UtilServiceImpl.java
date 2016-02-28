@@ -1,6 +1,7 @@
 package com.lixy.ftapi.service.impl;
 
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -24,9 +25,12 @@ import com.lixy.ftapi.dao.AlarmDao;
 import com.lixy.ftapi.dao.EventLogDao;
 import com.lixy.ftapi.dao.MailPoolDao;
 import com.lixy.ftapi.dao.ParameterDao;
+import com.lixy.ftapi.dao.ServerDao;
 import com.lixy.ftapi.dao.UFileDao;
 import com.lixy.ftapi.domain.EventLog;
+import com.lixy.ftapi.domain.Server;
 import com.lixy.ftapi.domain.UFile;
+import com.lixy.ftapi.exception.ApiException;
 import com.lixy.ftapi.service.MailService;
 import com.lixy.ftapi.service.UtilService;
 import com.lixy.ftapi.type.EventType;
@@ -61,6 +65,10 @@ public class UtilServiceImpl implements UtilService {
 	@Autowired
 	@Qualifier("alarmDaoImpl")
 	private AlarmDao alarmDao;
+	
+	@Autowired
+	@Qualifier("serverDaoImpl")
+	private ServerDao serverDao;
 
 	@Autowired
 	@Qualifier("uFileDaoImpl")
@@ -134,10 +142,7 @@ public class UtilServiceImpl implements UtilService {
 
 		try {
 			logger.info("FTAPI UPLOAD initialize start");
-			Constant.UPLOAD_SERVER_URL = CryptoUtils.decrypt(getParameterValue("UPLOAD_SERVER_URL")); // NOSONAR
-			Constant.UPLOAD_SERVER_USER = CryptoUtils.decrypt(getParameterValue("UPLOAD_SERVER_USER"));
-			Constant.UPLOAD_SERVER_PASS = CryptoUtils.decrypt(getParameterValue("UPLOAD_SERVER_PASS"));
-			Constant.UPLOAD_SERVER_UPLOAD_PATH = CryptoUtils.decrypt(getParameterValue("UPLOAD_SERVER_UPLOAD_PATH"));
+			Constant.UPLOAD_SERVER_ID = Long.valueOf(getParameterValue("UPLOAD_SERVER_ID")); 
 		} catch (Exception ex) {
 			logger.error("FTAPI UPLOAD initialize fail", ex);
 		}
@@ -227,6 +232,39 @@ public class UtilServiceImpl implements UtilService {
 	@Override
 	public Long addUFile(UFile ufile) {
 		return uFileDao.create(ufile);
+	}
+
+	@Override
+	public Server getServerById(Long id) throws ApiException {
+		Server server = serverDao.readById(id);
+		if(Util.isNullObject(server))
+			throw new ApiException("100", "Server not found!");
+		else
+			return server;
+	}
+
+	@Override
+	public UFile readFileById(Long id) throws ApiException {
+		UFile file = uFileDao.readById(id);
+		if(Util.isNullObject(file))
+			throw new ApiException("F100", "File Not Found!");
+		else 
+			return file;
+	}
+
+	@Override
+	public UFile readFileByIdentifier(String identifier) throws ApiException {
+		UFile file = uFileDao.readFileByIdentifier(identifier);
+		
+		if(Util.isNullObject(file))
+			throw new ApiException("F100", "File Not Found!");
+		else 
+			return file;
+	}
+
+	@Override
+	public List<UFile> readFileByStatus(Long status) {
+		return uFileDao.readFileByStatus(status);
 	}
 
 }

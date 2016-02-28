@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +55,7 @@ public class UploadController {
 				throw new ApiException("100", utilService.getMessage("user.id.empty"));
 			if (file == null || file.isEmpty())
 				throw new ApiException("101", utilService.getMessage("file.notexist"));
-
+			
 			User user = userService.getUserById(uid);
 			
 			if(!auth.getUser().hasAuthority(AuthorityType.ROLE_ROOT) && user.getId().longValue() != auth.getUser().getId().longValue())
@@ -77,6 +78,7 @@ public class UploadController {
 			uFile.setTempName(tempFileName);
 			uFile.setFullTempPath(tempFilePath);
 			uFile.setSize(file.getSize());
+			uFile.setFileIdentifier(UUID.randomUUID().toString());
 			uFile.setStatus(0L);
 			
 			Long createdFileId = utilService.addUFile(uFile);
@@ -86,6 +88,7 @@ public class UploadController {
 			response.setStatus(StatusType.OK);
 			response.setRespMessage(utilService.getMessage("upload.complete"));
 			response.setId(createdFileId);
+			response.setObject(uFile.getFileIdentifier());
 
 		} catch (ApiException e) {
 			response.convertToGResponse(e);
@@ -97,5 +100,7 @@ public class UploadController {
 
 		return response;
 	}
+	
+	
 
 }

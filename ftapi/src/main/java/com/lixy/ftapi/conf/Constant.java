@@ -22,10 +22,7 @@ public class Constant {
 	
 	public static String ROOT_FILE_PATH = "TEMP_FOLDER"; // NOSONAR
 	
-	public static String UPLOAD_SERVER_URL = null;
-	public static String UPLOAD_SERVER_USER = null;
-	public static String UPLOAD_SERVER_PASS = null;
-	public static String UPLOAD_SERVER_UPLOAD_PATH = null;
+	public static Long UPLOAD_SERVER_ID = null;
 	
 	public static final String DEFAULT_LOCALE = "tr";
 	

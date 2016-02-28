@@ -57,7 +57,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers(API_V1 + "/dummy/**", API_V1 + "/register/client", API_V1 + "/ua/**");		
+		web.ignoring().antMatchers(API_V1 + "/dummy/**", API_V1 + "/upload/get_file", API_V1 + "/register/client", API_V1 + "/ua/**");		
 	}
 
 	@Override

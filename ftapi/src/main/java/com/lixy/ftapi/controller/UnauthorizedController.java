@@ -1,20 +1,32 @@
 package com.lixy.ftapi.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lixy.ftapi.domain.Server;
+import com.lixy.ftapi.domain.UFile;
 import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.domain.VirtualCommenter;
 import com.lixy.ftapi.domain.VirtualCommenterPrice;
@@ -24,6 +36,7 @@ import com.lixy.ftapi.model.UserAuthentication;
 import com.lixy.ftapi.service.CustomerService;
 import com.lixy.ftapi.service.TokenAuthenticationService;
 import com.lixy.ftapi.service.UserService;
+import com.lixy.ftapi.service.UtilService;
 import com.lixy.ftapi.type.StatusType;
 import com.lixy.ftapi.type.SwitchType;
 import com.lixy.ftapi.util.FacebookUtil;
@@ -44,6 +57,9 @@ public class UnauthorizedController{
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UtilService utilService;
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/check/token")	
 	public GResponse checkToken(HttpServletRequest request, HttpServletResponse response){
@@ -132,6 +148,60 @@ public class UnauthorizedController{
 		}
 		
 		return response;
+	}
+	
+	@RequestMapping(value = "/get_file", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> getFile(@RequestParam("f") String identifier, HttpServletRequest request,
+			HttpServletResponse response) {
+
+		InputStream inputStream = null;
+		OutputStream outStream = null;
+
+		try {
+			UFile file = utilService.readFileByIdentifier(identifier);
+			Server server = file.getServer();
+			/*
+			RedirectView redirectView = new RedirectView();
+		    redirectView.setUrl(server.getHttpPath() +"/upload"+file.getFullServerPath());
+		    return redirectView;
+		    */			
+			
+			URL url = new URL(server.getHttpPath() +"/upload"+file.getFullServerPath());
+			
+		    HttpHeaders respHeaders = new HttpHeaders();
+
+		    respHeaders.setContentLength(file.getSize().intValue());
+		    respHeaders.setContentType(MediaType.parseMediaTypes(file.getMimeType()).get(0));
+		    //respHeaders.setContentDispositionFormData("attachment", file.getOriginalName());
+		    
+		    InputStreamResource isr = new InputStreamResource(url.openStream());
+		    return new ResponseEntity<InputStreamResource>(isr, respHeaders, HttpStatus.OK);
+		    
+		    /*
+
+			 // URLConnection connection = url.openConnection();
+			inputStream = url.openStream();
+	        outStream = response.getOutputStream();
+	        IOUtils.copy(inputStream, outStream);
+	        
+	        
+	        
+	        logger.info("File read success. identifier " + identifier);
+	        	*/
+
+		} catch (Exception e) {
+			logger.error("Exception for get_file(1) identifier " + identifier, e);
+		} finally {
+			try {
+				if (null != inputStream)
+					inputStream.close();
+				if (null != inputStream)
+					outStream.close();
+			} catch (IOException e) {
+				logger.error("Exception for get_file(2) identifier " + identifier, e);
+			}
+		}
+		return null;
 	}
 	
 }

@@ -1,8 +1,11 @@
 package com.lixy.ftapi.service;
 
+import java.util.List;
 import java.util.Locale;
 
+import com.lixy.ftapi.domain.Server;
 import com.lixy.ftapi.domain.UFile;
+import com.lixy.ftapi.exception.ApiException;
 import com.lixy.ftapi.type.EventType;
 import com.lixy.ftapi.type.FileFormatType;
 
@@ -27,7 +30,15 @@ public interface UtilService {
 	public String getTempFilePath();
 	
 	public Long addUFile(UFile ufile);
+	
+	public UFile readFileById(Long id) throws ApiException;
+	
+	public UFile readFileByIdentifier(String identifier) throws ApiException;
+	
+	public List<UFile> readFileByStatus(Long status);
 
 	public Locale getLocale();
+	
+	public Server getServerById(Long id) throws ApiException;
 
 }

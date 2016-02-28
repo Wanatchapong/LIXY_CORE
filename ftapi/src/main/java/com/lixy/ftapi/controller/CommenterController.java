@@ -14,14 +14,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lixy.ftapi.domain.FortuneRequest;
+import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.exception.ApiException;
 import com.lixy.ftapi.model.FortuneInfo;
 import com.lixy.ftapi.model.GResponse;
 import com.lixy.ftapi.model.UserAuthentication;
 import com.lixy.ftapi.service.CommenterService;
 import com.lixy.ftapi.service.FortuneService;
+import com.lixy.ftapi.service.UserService;
 import com.lixy.ftapi.service.UtilService;
 import com.lixy.ftapi.type.AuthorityType;
+import com.lixy.ftapi.type.RequestStatusType;
 import com.lixy.ftapi.type.StatusType;
 import com.lixy.ftapi.util.Util;
 
@@ -40,6 +43,10 @@ public class CommenterController {
 	
 	@Autowired
 	private FortuneService fortuneService;
+	
+	@Autowired
+	private UserService userService;
+
 
 	@RequestMapping(value = "/get_fortune_list", method = RequestMethod.GET)
 	public GResponse getFortuneRequestByStatus(
@@ -75,12 +82,13 @@ public class CommenterController {
 	public GResponse ownFortuneRequest(
 			UserAuthentication auth, 
 			@PathVariable(value = "id") Long requestId,
-			@RequestParam(value = "userId", required=false) Long ownerToBeWanted
+			@RequestParam(value = "userId", required=false) Long ownerToBeWanted,
+			@RequestParam(value = "type", required=false) String type
 		) {
 		GResponse response = new GResponse();
 		response.setUid(auth.getUser().getId());
 
-		logger.info(auth.getUser().getUsername() + " asked for fortune request info for " + requestId);
+		logger.info(auth.getUser().getUsername() + " asked for ownership change request for " + requestId + ", " + ownerToBeWanted + "," + type);
 
 		try {
 			FortuneRequest request = fortuneService.getFortuneRequestById(requestId);
@@ -88,22 +96,49 @@ public class CommenterController {
 			if(Util.isNullObject(request)){
 				throw new ApiException("101", utilService.getMessage("fortune.request.not.exist"));
 			} 
-
-			if(Util.isNullObject(ownerToBeWanted) || auth.getUser().isCommenter()) //commenter or null must be auth user
-				ownerToBeWanted = auth.getUser().getId();
 			
-			if(auth.getUser().isCommenter() && request.getOwnerId() != null){
-				if(request.getOwnerId().longValue() != auth.getUser().getId().longValue())
-					throw new ApiException("102", utilService.getMessage("fortune.request.owner.already.exist"));
-				else 
-					throw new ApiException("103", utilService.getMessage("fortune.request.owner.already.you"));
-			} else {
-				request.setOwnerId(ownerToBeWanted);
-				request.setModifiedDate(new Date());
-				request.setModifiedBy(auth.getUser().getId()+"");
+			if(!Util.isNullOrEmpty(type) && "C".equals(type)){
+				if(Util.isNullObject(request.getOwnerId()))
+					throw new ApiException("109", utilService.getMessage("fortune.request.owner.empty"));
+				
+				if(!auth.getUser().isRoot()){
+					if(request.getOwnerId().compareTo(auth.getUser().getId()) != 0 ){//only owner can cancel
+						throw new ApiException("110", utilService.getMessage("fortune.request.owner.cancel.notallowed"));
+					}
+				}
+				
+				request.setOwnerId(null);
+				request.setRequestStatus(RequestStatusType.APPROVED.getShortCode());
 				fortuneService.updateFortuneRequest(request);
 				
 				response.setStatus(StatusType.OK);
+				
+			} else {
+
+				if(Util.isNullObject(ownerToBeWanted) || auth.getUser().isCommenter()) //commenter or null must be auth user
+					ownerToBeWanted = auth.getUser().getId();
+				
+				if(auth.getUser().isCommenter() && request.getOwnerId() != null){
+					if(request.getOwnerId().longValue() != auth.getUser().getId().longValue())
+						throw new ApiException("102", utilService.getMessage("fortune.request.owner.already.exist"));
+					else 
+						throw new ApiException("103", utilService.getMessage("fortune.request.owner.already.you"));
+				} else {
+					userService.checkUserSuitableForProcess(ownerToBeWanted);
+					
+					User user = userService.getUserById(ownerToBeWanted);
+					if(!(user.hasAuthority(AuthorityType.ROLE_COMMENTER) || user.hasAuthority(AuthorityType.ROLE_ROOT)))
+						throw new ApiException("199", utilService.getMessage("auth.notenaugh"));
+					
+					request.setOwnerId(ownerToBeWanted);
+					request.setModifiedDate(new Date());
+					request.setModifiedBy(auth.getUser().getId()+"");
+					request.setRequestStatus(RequestStatusType.OPEN.getShortCode());
+					fortuneService.updateFortuneRequest(request);
+					
+					response.setStatus(StatusType.OK);
+				}
+			
 			}
 
 		} catch (Exception ex) {

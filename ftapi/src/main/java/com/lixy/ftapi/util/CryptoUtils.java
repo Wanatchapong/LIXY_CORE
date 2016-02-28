@@ -84,7 +84,7 @@ public class CryptoUtils {
 	
 	public static void main(String[] args) throws CryptoInitException {
 		CryptoUtils.init();
-		System.out.println(CryptoUtils.encrypt("ad1df94a6b2692da1e7974b421e0e368"));
+		System.out.println(CryptoUtils.encrypt("2637lixy"));
 	}
 	
 }

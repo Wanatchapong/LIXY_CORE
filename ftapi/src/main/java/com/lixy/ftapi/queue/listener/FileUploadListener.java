@@ -13,8 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lixy.ftapi.conf.Constant;
 import com.lixy.ftapi.dao.UFileDao;
+import com.lixy.ftapi.domain.Server;
 import com.lixy.ftapi.domain.UFile;
 import com.lixy.ftapi.exception.ApiException;
+import com.lixy.ftapi.service.UtilService;
+import com.lixy.ftapi.util.CryptoUtils;
 import com.lixy.ftapi.util.FTPUploader;
 import com.lixy.ftapi.util.Util;
 
@@ -25,6 +28,9 @@ public class FileUploadListener implements MessageListener {
 	@Autowired
 	@Qualifier("uFileDaoImpl")
 	private UFileDao uFileDao;
+	
+	@Autowired
+	private UtilService utilService;
 
 	@Override
 	@Transactional
@@ -49,15 +55,18 @@ public class FileUploadListener implements MessageListener {
 		try {
 			if (Util.isNullObject(file))
 				throw new ApiException("File not found.");
-			else if (file.getStatus().longValue() != 0L)
-				throw new ApiException("status != 0");
+			else if (file.getStatus().longValue() != 0L && file.getStatus().longValue() != 3L)
+				throw new ApiException("status != 0,3");
 
+			Server server = utilService.getServerById(Constant.UPLOAD_SERVER_ID);
+			
 			file.setStatus(1L);
+			file.setServer(server);
 			uFileDao.update(file);
 
 			String uploadPath = file.getOwner() == null ? "/" : "/" + file.getOwner() + "/";
 
-			uploader = new FTPUploader(Constant.UPLOAD_SERVER_URL, Constant.UPLOAD_SERVER_USER, Constant.UPLOAD_SERVER_PASS);
+			uploader = new FTPUploader(server.getIp(), server.getUser(), CryptoUtils.decrypt(server.getPassword()));
 			uploader.uploadFile(file.getFullTempPath(), file.getTempName(), uploadPath);
 
 			file.setStatus(2L);
