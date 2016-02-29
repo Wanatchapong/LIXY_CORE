@@ -171,8 +171,7 @@ public class TokenAuthenticationServiceImpl implements TokenAuthenticationServic
 	}
 
 	@Override
-	public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		final String token = request.getHeader(AUTH_HEADER_NAME);
 		
@@ -201,7 +200,7 @@ public class TokenAuthenticationServiceImpl implements TokenAuthenticationServic
 				info.setDesc(e.getDescription());
 				info.setObject(e);
 				
-				logger.warn("Token Exception", e);
+				logger.warn("Token Exception : " + e.getMessage());
 			} catch (Exception e){
 				info.setCode(103L);
 				info.setDesc("UNWANTED_EXCEPTION_RELOGIN_NEEDED");

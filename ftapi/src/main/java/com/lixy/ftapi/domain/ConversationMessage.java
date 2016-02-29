@@ -2,7 +2,9 @@ package com.lixy.ftapi.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,12 +13,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @DynamicInsert
@@ -31,18 +38,25 @@ public class ConversationMessage implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	@JsonIgnore
 	@JoinColumn(name = "conversation_id", referencedColumnName = "id")
 	@ManyToOne(optional = false, fetch = FetchType.EAGER)
 	private Conversation conversation;
 
+	@JsonIgnore
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	@ManyToOne(optional = false, fetch = FetchType.EAGER)
 	private User user;
 
+	@JsonIgnore
 	@JoinColumn(name = "vcommenter_id", referencedColumnName = "id")
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private VirtualCommenter virtualCommenter;
-
+	
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "conversationMessage", fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<ConversationMessageDetail> conversationMessageDetails;
+	
 	@Column(name = "reply_text")
 	private String replyText;
 

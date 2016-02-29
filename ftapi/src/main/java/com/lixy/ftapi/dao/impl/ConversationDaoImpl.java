@@ -1,5 +1,9 @@
 package com.lixy.ftapi.dao.impl;
 
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.lixy.ftapi.dao.ConversationDao;
@@ -9,6 +13,15 @@ import com.lixy.ftapi.domain.Conversation;
 public class ConversationDaoImpl extends GenericDaoHibernateImpl<Conversation, Long> implements ConversationDao {
 
 	private static final long serialVersionUID = 3493790068018663172L;
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Conversation> getConversationListByRequestId(Long requestId) {
+		DetachedCriteria criteria = DetachedCriteria.forClass(Conversation.class);
+		criteria.add(Restrictions.eq("requestId", requestId));
+		
+		return criteria.getExecutableCriteria(getCurrentSession()).list();
+	}
 
 
 }

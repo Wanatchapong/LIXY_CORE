@@ -310,6 +310,11 @@ public class FortuneServiceImpl implements FortuneService {
 		
 		return conversationDao.create(conversation);
 	}
+	
+	@Override
+	public List<Conversation> getConversationList(Long requestId){
+		return conversationDao.getConversationListByRequestId(requestId);
+	}
 
 	@Override
 	public List<FortuneInfo> convertAllToFortuneInfo(List<FortuneRequest> request) {
