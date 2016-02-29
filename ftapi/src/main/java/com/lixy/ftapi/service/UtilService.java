@@ -2,6 +2,7 @@ package com.lixy.ftapi.service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.lixy.ftapi.domain.Server;
 import com.lixy.ftapi.domain.UFile;
@@ -40,5 +41,7 @@ public interface UtilService {
 	public Locale getLocale();
 	
 	public Server getServerById(Long id) throws ApiException;
+	
+	public Map<String, String> getUFileInfo(String identifier) throws ApiException;
 
 }

@@ -1,5 +1,6 @@
 package com.lixy.ftapi.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import com.lixy.ftapi.model.UserAuthentication;
 import com.lixy.ftapi.service.CustomerService;
 import com.lixy.ftapi.service.TokenAuthenticationService;
 import com.lixy.ftapi.service.UserService;
+import com.lixy.ftapi.service.UtilService;
 import com.lixy.ftapi.type.StatusType;
 import com.lixy.ftapi.type.SwitchType;
 import com.lixy.ftapi.util.FacebookUtil;
@@ -44,6 +46,9 @@ public class UnauthorizedController{
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UtilService utilService;
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/check/token")	
 	public GResponse checkToken(HttpServletRequest request, HttpServletResponse response){
@@ -132,6 +137,12 @@ public class UnauthorizedController{
 		}
 		
 		return response;
+	}
+	
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/get_file")	
+	public void locateToFile(HttpServletResponse httpServletResponse, @RequestParam("f") String identifier) throws IOException, ApiException{
+		httpServletResponse.sendRedirect(utilService.getUFileInfo(identifier).get("CURL"));
 	}
 	
 }

@@ -1,8 +1,11 @@
 package com.lixy.ftapi.service.impl;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -265,6 +268,22 @@ public class UtilServiceImpl implements UtilService {
 	@Override
 	public List<UFile> readFileByStatus(Long status) {
 		return uFileDao.readFileByStatus(status);
+	}
+
+	@Override
+	public Map<String, String> getUFileInfo(String identifier) throws ApiException {
+		Map<String, String> info = new HashMap<>();
+		
+		UFile file = readFileByIdentifier(identifier);
+		Server server = file.getServer();
+		
+		info.put("FSP", file.getFullServerPath());
+		info.put("IDTFR", file.getFileIdentifier());
+		info.put("MIM", file.getMimeType());
+		info.put("CURL", server.getHttpPath()+"/file_r3.php?f="+file.getFullServerPath());
+		info.put("KKTR", UUID.randomUUID().toString());
+		
+		return info;
 	}
 
 }

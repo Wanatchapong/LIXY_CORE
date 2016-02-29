@@ -18,6 +18,8 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @DynamicInsert
 @DynamicUpdate
@@ -26,6 +28,7 @@ public class UFile implements Serializable {
 
 	private static final long serialVersionUID = -4446929343152142811L;
 
+	@JsonIgnore
 	@Id
 	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,21 +40,26 @@ public class UFile implements Serializable {
 	@Column(name = "owner")
 	private Long owner;
 
+	@JsonIgnore
 	@Column(name = "original_name")
 	private String originalName;
 	
+	@JsonIgnore
 	@Column(name = "mime_type")
 	private String mimeType;
 
 	@Column(name = "temp_name")
 	private String tempName;
 	
+	@JsonIgnore
 	@Column(name = "size")
 	private Long size;
 
+	@JsonIgnore
 	@Column(name = "full_temp_path")
 	private String fullTempPath;
 	
+	@JsonIgnore
 	@Column(name = "full_server_path")
 	private String fullServerPath;
 	
