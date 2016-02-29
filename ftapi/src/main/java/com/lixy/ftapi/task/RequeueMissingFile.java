@@ -11,14 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lixy.ftapi.conf.Constant;
-import com.lixy.ftapi.dao.MailPoolDao;
 import com.lixy.ftapi.dao.UFileDao;
-import com.lixy.ftapi.domain.MailPool;
 import com.lixy.ftapi.domain.UFile;
 import com.lixy.ftapi.queue.manager.QueueManager;
-import com.lixy.ftapi.service.MailService;
 import com.lixy.ftapi.service.UtilService;
-import com.lixy.ftapi.type.SwitchType;
 import com.lixy.ftapi.util.Util;
 
 @Service

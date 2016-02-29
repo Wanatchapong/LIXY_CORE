@@ -41,20 +41,5 @@
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
 	
-	<servlet>
-	    <servlet-name>fileServlet</servlet-name>
-	    <servlet-class>com.lixy.ftapi.controller.FileServlet</servlet-class>
-	    <init-param>
-	        <param-name>basePath</param-name>
-	        <param-value>/Users/obenisik/Downloads</param-value>
-	    </init-param>
-	</servlet>
-
-	<servlet-mapping>
-	    <servlet-name>fileServlet</servlet-name>
-	    <url-pattern>/files/*</url-pattern>
-	</servlet-mapping>
-	
-	
 
 </web-app>
