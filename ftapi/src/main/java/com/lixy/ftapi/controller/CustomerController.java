@@ -185,5 +185,28 @@ public class CustomerController {
 		return response;
 	}
 	
+	@RequestMapping(value = "/conversations/{requestId}", method = RequestMethod.GET)
+	public GResponse getConversationList(UserAuthentication auth, @PathVariable(value = "requestId") Long requestId) {
+		GResponse response = new GResponse();
+		response.setUid(auth.getUser().getId());
+
+		try {
+			boolean isVisible = utilService.isFortuneConversationVisibleToTheUser(requestId, auth.getUser());
+			response.setStatus(StatusType.OK);
+			
+			if(isVisible){
+				response.setObject(auth.getUser().isRoot() == true ? fortuneService.getConversationListForRoot(requestId) : fortuneService.getConversationList(requestId));
+			}				
+			else
+				response.setRespMessage("NOT_AUTHORIZED");
+
+		} catch (Exception ex) {
+			response.convertToGResponse(ex);
+		}
+
+		logger.info(response);
+		return response;
+	}
+	
 	
 }

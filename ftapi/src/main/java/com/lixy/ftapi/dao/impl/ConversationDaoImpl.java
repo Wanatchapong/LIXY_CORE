@@ -16,10 +16,20 @@ public class ConversationDaoImpl extends GenericDaoHibernateImpl<Conversation, L
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Conversation> getConversationListByRequestId(Long requestId) {
+	public List<Conversation> getConversationListByRequestIdForRoot(Long requestId) {
 		DetachedCriteria criteria = DetachedCriteria.forClass(Conversation.class);
-		criteria.add(Restrictions.eq("requestId", requestId));
+		criteria.add(Restrictions.eq("fortuneRequest.id", requestId));
+		return criteria.getExecutableCriteria(getCurrentSession()).list();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Conversation> getConversationListByRequestId(Long requestId) {
+		String[] readableStatus = {"O", "C"}; 
 		
+		DetachedCriteria criteria = DetachedCriteria.forClass(Conversation.class);
+		criteria.add(Restrictions.eq("fortuneRequest.id", requestId));
+		criteria.add(Restrictions.in("status", readableStatus));
 		return criteria.getExecutableCriteria(getCurrentSession()).list();
 	}
 

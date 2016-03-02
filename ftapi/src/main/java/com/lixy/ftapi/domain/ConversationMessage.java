@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,11 +16,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -39,9 +38,8 @@ public class ConversationMessage implements Serializable {
 	private Long id;
 
 	@JsonIgnore
-	@JoinColumn(name = "conversation_id", referencedColumnName = "id")
-	@ManyToOne(optional = false, fetch = FetchType.EAGER)
-	private Conversation conversation;
+	@Column(name = "conversation_id")
+	private Long conversationId;
 
 	@JsonIgnore
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -50,13 +48,9 @@ public class ConversationMessage implements Serializable {
 
 	@JsonIgnore
 	@JoinColumn(name = "vcommenter_id", referencedColumnName = "id")
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, fetch = FetchType.EAGER)
 	private VirtualCommenter virtualCommenter;
-	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "conversationMessage", fetch = FetchType.EAGER)
-    @Fetch(value = FetchMode.SUBSELECT)
-    private List<ConversationMessageDetail> conversationMessageDetails;
-	
+
 	@Column(name = "reply_text")
 	private String replyText;
 
@@ -66,12 +60,38 @@ public class ConversationMessage implements Serializable {
 	@Column(name = "status")
 	private Long status;
 
+	@JsonIgnore
 	@Column(name = "ip")
 	private String ip;
 
 	@Column(name = "CREATED_DATE")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date createdDate;
+	
+	@OneToMany(cascade = javax.persistence.CascadeType.ALL, mappedBy = "conversationMessage", fetch = FetchType.EAGER)
+    @Fetch(value = org.hibernate.annotations.FetchMode.SUBSELECT)
+    private List<ConversationMessageDetail> conversationMessageDetails;
+	
+	@Transient
+	private String senderFullName;
+	
+	@Transient
+	private Long senderId;
+	
+	@Transient
+	private String vCommenterFullName;
+	
+	public String getvCommenterFullName() {
+		return virtualCommenter.getFullName();
+	}
+
+	public String getSenderFullName(){
+		return user.getFullName();
+	}
+	
+	public Long getSenderId(){
+		return user.getId();
+	}
 
 	public Long getId() {
 		return id;
@@ -79,14 +99,6 @@ public class ConversationMessage implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Conversation getConversation() {
-		return conversation;
-	}
-
-	public void setConversation(Conversation conversation) {
-		this.conversation = conversation;
 	}
 
 	public User getUser() {

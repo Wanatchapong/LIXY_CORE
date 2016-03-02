@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.lixy.ftapi.domain.Server;
 import com.lixy.ftapi.domain.UFile;
+import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.exception.ApiException;
 import com.lixy.ftapi.type.EventType;
 import com.lixy.ftapi.type.FileFormatType;
@@ -43,5 +44,7 @@ public interface UtilService {
 	public Server getServerById(Long id) throws ApiException;
 	
 	public Map<String, String> getUFileInfo(String identifier) throws ApiException;
+	
+	public boolean isFortuneConversationVisibleToTheUser(Long requestId, User user) throws ApiException;
 
 }

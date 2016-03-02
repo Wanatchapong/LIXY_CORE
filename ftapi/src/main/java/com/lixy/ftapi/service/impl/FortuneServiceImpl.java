@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lixy.ftapi.dao.ConversationDao;
+import com.lixy.ftapi.dao.ConversationMessageDao;
 import com.lixy.ftapi.dao.FortuneRequestDao;
 import com.lixy.ftapi.dao.FortuneRequestDetailDao;
 import com.lixy.ftapi.domain.Conversation;
+import com.lixy.ftapi.domain.ConversationMessage;
 import com.lixy.ftapi.domain.Customer;
 import com.lixy.ftapi.domain.FortuneRequest;
 import com.lixy.ftapi.domain.FortuneRequestDetail;
@@ -27,6 +29,7 @@ import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.domain.VirtualCommenter;
 import com.lixy.ftapi.domain.VirtualCommenterPrice;
 import com.lixy.ftapi.exception.ApiException;
+import com.lixy.ftapi.model.ConversationModel;
 import com.lixy.ftapi.model.FortuneInfo;
 import com.lixy.ftapi.model.FortuneRequestModel;
 import com.lixy.ftapi.queue.manager.QueueManager;
@@ -55,10 +58,14 @@ public class FortuneServiceImpl implements FortuneService {
 	@Autowired
 	@Qualifier("fortuneRequestDetailDaoImpl")
 	private FortuneRequestDetailDao fortuneRequestDetailDao;
-	
+
 	@Autowired
 	@Qualifier("conversationDaoImpl")
 	private ConversationDao conversationDao;
+
+	@Autowired
+	@Qualifier("conversationMessageDaoImpl")
+	private ConversationMessageDao conversationMessageDao;
 
 	@Autowired
 	private UtilService utilService;
@@ -80,9 +87,9 @@ public class FortuneServiceImpl implements FortuneService {
 		}
 		return request;
 	}
-	
+
 	@Override
-	public void checkFortuneRequestContent(FortuneRequest request, Map<String, String> details) throws ApiException{ // NOSONAR
+	public void checkFortuneRequestContent(FortuneRequest request, Map<String, String> details) throws ApiException { // NOSONAR
 		if (Util.isNullObject(request))
 			throw new ApiException("100", utilService.getMessage("fortune.request.not.exist"));
 		else if (Util.isNullOrEmptyHashMap(details))
@@ -106,9 +113,11 @@ public class FortuneServiceImpl implements FortuneService {
 
 		main.setId(null); // it must be
 		main.setRequesterId(authUser.getId()); // it must be
-		main.setRequestStatus(RequestStatusType.INITIAL.getShortCode()); // it must be
-		
-		if(Util.isNullOrEmpty(main.getRequestLocale()))
+		main.setRequestStatus(RequestStatusType.INITIAL.getShortCode()); // it
+																			// must
+																			// be
+
+		if (Util.isNullOrEmpty(main.getRequestLocale()))
 			main.setRequestLocale(utilService.getLocale() == null ? "tr" : utilService.getLocale().getLanguage());
 
 		RequestType requestType = customerService.getRequestType(main.getRequestTypeId());
@@ -129,11 +138,14 @@ public class FortuneServiceImpl implements FortuneService {
 			throw new ApiException("116", utilService.getMessage("fortune.details.not.enaugh"));
 
 		// price operations
-		VirtualCommenterPrice price = customerService.getVirtualCommenterPriceByResponseType(virtualCommenter.getId(), main.getResponseTypeId(), SwitchType.ACTIVE.getSwithStatus());
+		VirtualCommenterPrice price = customerService.getVirtualCommenterPriceByResponseType(virtualCommenter.getId(),
+				main.getResponseTypeId(), SwitchType.ACTIVE.getSwithStatus());
 		if (Util.isNullObject(price))
 			throw new ApiException("106", utilService.getMessage("fortune.price.not.exist"));
 
-		if (price.getCredit().compareTo(main.getPaidCredit()) != 0) { // prices are different
+		if (price.getCredit().compareTo(main.getPaidCredit()) != 0) { // prices
+																		// are
+																		// different
 			throw new ApiException("107", utilService.getMessage("fortune.price.different"));
 		}
 
@@ -153,9 +165,9 @@ public class FortuneServiceImpl implements FortuneService {
 
 		if (customerBalance.compareTo(price.getCredit()) < 0)
 			throw new ApiException("113", utilService.getMessage("balance.notenaugh"));
-		
+
 		customerService.substractCredit(user.getId(), user.getId(), price.getCredit(), UpdateCreditReason.NEW_FORTUNE);
-		
+
 		customer.setTotalCreditSpent(customer.getTotalCreditSpent().add(price.getCredit()));
 		customer.setTotalFortune(customer.getTotalFortune().longValue() + 1);
 
@@ -170,12 +182,13 @@ public class FortuneServiceImpl implements FortuneService {
 			subItem.setValue(detail.get(key));
 
 			fortuneRequestDetailDao.create(subItem);
-		}				
+		}
 
 		virtualCommenter.setTotalFortuneCount(virtualCommenter.getTotalFortuneCount() + 1L);
 		customerService.updateVirtualCommenter(virtualCommenter);
-		
-		utilService.addEventLog(user.getId(), EventType.NEW_FORTUNE, "Fortune with " + id + " is added. Paid credit : " + main.getPaidCredit());
+
+		utilService.addEventLog(user.getId(), EventType.NEW_FORTUNE,
+				"Fortune with " + id + " is added. Paid credit : " + main.getPaidCredit());
 
 		try {
 			queueManager.sendToNewFortuneQueue(id);
@@ -241,11 +254,11 @@ public class FortuneServiceImpl implements FortuneService {
 
 	@Override
 	public List<FortuneInfo> getFortuneRequestByUserId(Long userId, RequestStatusType status) throws ApiException {
-		userService.getUserById(userId); //check user exist
-		
+		userService.getUserById(userId); // check user exist
+
 		List<FortuneInfo> infos = new ArrayList<>();
 		List<FortuneRequest> requests = fortuneRequestDao.getFortuneRequestByUserId(userId, status);
-		for (FortuneRequest	 fortuneRequest : requests) {
+		for (FortuneRequest fortuneRequest : requests) {
 			infos.add(convertToRequestModel(fortuneRequest));
 		}
 
@@ -268,7 +281,7 @@ public class FortuneServiceImpl implements FortuneService {
 
 		if (!Util.isNullObject(request.getOwnerId())) {
 			User owner = userService.getUserById(request.getOwnerId());
-			if (!Util.isNullObject(owner)){
+			if (!Util.isNullObject(owner)) {
 				owner.getAuthorities().clear();
 				info.setOwner(owner);
 			}
@@ -294,33 +307,66 @@ public class FortuneServiceImpl implements FortuneService {
 		info.setResponseType(responseType);
 
 		info.setDetails(request.getDetails());
-		
+
 		info.setCreatedDate(request.getCreatedDate());
 		info.setLastModifiedDate(request.getModifiedDate());
 	}
 
 	@Override
-	public Long createConversation(Long requestId, Long transactionLimit, ConversationStatusType status) throws ApiException {
+	public Long createConversation(Long requestId, Long transactionLimit, ConversationStatusType status)
+			throws ApiException {
 		FortuneRequest request = getFortuneRequestById(requestId);
-		
+
 		Conversation conversation = new Conversation();
 		conversation.setFortuneRequest(request);
 		conversation.setStatus(status.getShortCode());
 		conversation.setTransactionLimit(transactionLimit);
-		
+
 		return conversationDao.create(conversation);
 	}
-	
+
 	@Override
-	public List<Conversation> getConversationList(Long requestId){
-		return conversationDao.getConversationListByRequestId(requestId);
+	public List<ConversationModel> getConversationList(Long requestId) {
+		List<ConversationModel> conversationModels = new ArrayList<>();
+
+		List<Conversation> conversations = conversationDao.getConversationListByRequestId(requestId);
+		for (Conversation conversation : conversations) {
+			ConversationModel model = new ConversationModel();
+			List<ConversationMessage> messages = conversationMessageDao.readByConversationId(conversation.getId());
+
+			model.setConversation(conversation);
+			model.setMessages(messages);
+
+			conversationModels.add(model);
+		}
+
+		return conversationModels;
+	}
+
+	@Override
+	public List<ConversationModel> getConversationListForRoot(Long requestId) {
+		List<ConversationModel> conversationModels = new ArrayList<>();
+
+		List<Conversation> conversations = conversationDao.getConversationListByRequestIdForRoot(requestId);
+		for (Conversation conversation : conversations) {
+			ConversationModel model = new ConversationModel();
+			List<ConversationMessage> messages = conversationMessageDao
+					.readByConversationIdForRoot(conversation.getId());
+
+			model.setConversation(conversation);
+			model.setMessages(messages);
+
+			conversationModels.add(model);
+		}
+
+		return conversationModels;
 	}
 
 	@Override
 	public List<FortuneInfo> convertAllToFortuneInfo(List<FortuneRequest> request) {
-		if(Util.isNullObject(request))
+		if (Util.isNullObject(request))
 			return null;
-		
+
 		List<FortuneInfo> infos = new ArrayList<>();
 		for (FortuneRequest fortuneRequest : request) {
 			try {
@@ -329,7 +375,7 @@ public class FortuneServiceImpl implements FortuneService {
 				logger.error("APIEX", e);
 			}
 		}
-		
+
 		return infos;
 	}
 }

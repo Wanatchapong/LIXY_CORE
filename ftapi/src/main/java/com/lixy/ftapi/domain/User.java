@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.lixy.ftapi.type.AuthorityType;
+import com.lixy.ftapi.util.Util;
 
 @Entity
 @DynamicInsert
@@ -84,6 +85,11 @@ public class User extends BaseEntity implements UserDetails, Serializable{
 	
 	@Column(name = "status")
 	private Long status;
+	
+	@JsonInclude
+	public String getFullName(){
+		return (Util.isNullOrEmpty(name) ? "" : name ) + " " + (Util.isNullOrEmpty(surname) ? "" : surname); 
+	}
 	
 	@JsonInclude
 	public List<String> getAuthoritiesStr(){

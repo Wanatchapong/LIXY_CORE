@@ -3,11 +3,11 @@ package com.lixy.ftapi.service;
 import java.util.List;
 import java.util.Map;
 
-import com.lixy.ftapi.domain.Conversation;
 import com.lixy.ftapi.domain.FortuneRequest;
 import com.lixy.ftapi.domain.FortuneRequestDetail;
 import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.exception.ApiException;
+import com.lixy.ftapi.model.ConversationModel;
 import com.lixy.ftapi.model.FortuneInfo;
 import com.lixy.ftapi.model.FortuneRequestModel;
 import com.lixy.ftapi.type.ConversationStatusType;
@@ -36,11 +36,13 @@ public interface FortuneService {
 	public FortuneInfo convertToRequestModel(FortuneRequest request) throws ApiException;
 
 	public void checkFortuneRequestContent(FortuneRequest request, Map<String, String> details) throws ApiException;
+		
+	public List<FortuneInfo> convertAllToFortuneInfo(List<FortuneRequest> request);
 	
 	public Long createConversation(Long requestId, Long transactionLimit, ConversationStatusType status) throws ApiException;
 	
-	public List<Conversation> getConversationList(Long requestId);
+	public List<ConversationModel> getConversationList(Long requestId);
 
-	public List<FortuneInfo> convertAllToFortuneInfo(List<FortuneRequest> request);
+	public List<ConversationModel> getConversationListForRoot(Long requestId);
 
 }

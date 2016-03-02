@@ -2,9 +2,7 @@ package com.lixy.ftapi.domain;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,15 +11,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -53,24 +48,12 @@ public class Conversation implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date createdDate;
 	
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "conversation", fetch = FetchType.EAGER)
-    @Fetch(value = FetchMode.SUBSELECT)
-    private List<ConversationMessage> conversationMessages;
-
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public List<ConversationMessage> getConversationMessages() {
-		return conversationMessages;
-	}
-
-	public void setConversationMessages(List<ConversationMessage> conversationMessages) {
-		this.conversationMessages = conversationMessages;
 	}
 
 	public FortuneRequest getFortuneRequest() {
@@ -88,8 +71,6 @@ public class Conversation implements Serializable {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
-	
 
 	public Long getTransactionLimit() {
 		return transactionLimit;

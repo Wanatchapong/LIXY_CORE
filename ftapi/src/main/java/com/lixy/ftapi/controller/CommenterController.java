@@ -182,21 +182,4 @@ public class CommenterController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/conversations/{requestId}", method = RequestMethod.GET)
-	public GResponse getConversationList(UserAuthentication auth, @PathVariable(value = "requestId") Long requestId) {
-		GResponse response = new GResponse();
-		response.setUid(auth.getUser().getId());
-
-		try {
-			response.setStatus(StatusType.OK);
-			response.setObject(fortuneService.getConversationList(requestId));
-
-		} catch (Exception ex) {
-			response.convertToGResponse(ex);
-		}
-
-		logger.info(response);
-		return response;
-	}
-	
 }

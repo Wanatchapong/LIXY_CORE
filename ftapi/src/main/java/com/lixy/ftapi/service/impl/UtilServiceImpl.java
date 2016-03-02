@@ -31,9 +31,12 @@ import com.lixy.ftapi.dao.ParameterDao;
 import com.lixy.ftapi.dao.ServerDao;
 import com.lixy.ftapi.dao.UFileDao;
 import com.lixy.ftapi.domain.EventLog;
+import com.lixy.ftapi.domain.FortuneRequest;
 import com.lixy.ftapi.domain.Server;
 import com.lixy.ftapi.domain.UFile;
+import com.lixy.ftapi.domain.User;
 import com.lixy.ftapi.exception.ApiException;
+import com.lixy.ftapi.service.FortuneService;
 import com.lixy.ftapi.service.MailService;
 import com.lixy.ftapi.service.UtilService;
 import com.lixy.ftapi.type.EventType;
@@ -76,6 +79,9 @@ public class UtilServiceImpl implements UtilService {
 	@Autowired
 	@Qualifier("uFileDaoImpl")
 	private UFileDao uFileDao;
+	
+	@Autowired
+	private FortuneService fortuneService;
 
 	@Autowired
 	private MessageSource messageSource;
@@ -284,6 +290,25 @@ public class UtilServiceImpl implements UtilService {
 		info.put("KKTR", UUID.randomUUID().toString());
 		
 		return info;
+	}
+
+	@Override
+	public boolean isFortuneConversationVisibleToTheUser(Long requestId, User user) throws ApiException {
+		FortuneRequest request = fortuneService.getFortuneRequestById(requestId);
+		
+		if(user.isCommenter()){
+			if(request.getOwnerId() != null && user.getId().compareTo(request.getOwnerId()) == 0){ //commenter(s) can only view messages if they have ownership
+				return true;
+			}
+		} else if(user.isRoot()){
+			return true;
+		} else { //user
+			if(request.getRequesterId().compareTo(user.getId()) == 0){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 }
